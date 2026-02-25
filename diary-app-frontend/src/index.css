@@ -1,0 +1,18 @@
+@import "tailwindcss";
+.font-mate {
+  font-family: "Mate", serif;
+}
+
+.font-dancing-script {
+  font-family: "Dancing Script", cursive;
+}
+.text-cream{
+  color: #FFF7D4
+}
+.text-coffee{
+  color: #6C3428
+}
+
+.bg-cream{
+  background-color: #FFF7D4;
+}
