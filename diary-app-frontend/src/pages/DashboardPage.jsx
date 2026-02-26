@@ -1,14 +1,70 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
 import api from "../services/api";
 import ShadowButton from "../components/ShadowButton";
+import ShadowBox from "../components/ShadowBox";
+import diaryIcon from "../assets/diary-icon.png";
+import radioClose from "../assets/radio-close.png";
+import radioOpen from "../assets/radio-open.png";
+import diaryOpen from "../assets/diary-open.png";
+import music from "../assets/lofi-music.mp3";
+import pageFlip from "../assets/page-flip.mp3";
+import Calendar from "react-calendar";
+import diarytext from "../assets/diary-text.png";
+import coffee from "../assets/coffee.gif";
+import habit from "../assets/habit-tracker.png";
+import "react-calendar/dist/Calendar.css";
 
 const DashboardPage = () => {
-  const { logout } = useContext(AuthContext);
+  const { logout, name } = useContext(AuthContext);
+const [editingId, setEditingId] = useState(null);
+const [editingContent, setEditingContent] = useState("");
   const [entries, setEntries] = useState([]);
   const [content, setContent] = useState("");
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isRadioOpen, setIsRadioOpen] = useState(false);
+  const [isDiaryOpen, setIsDiaryOpen] = useState(false);
+  const [isRadioAnimating, setIsRadioAnimating] = useState(false);
+  const [showEntriesView, setShowEntriesView] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Fetch entries when component mounts
+  const audioRef = useRef(null);
+  const isToday = (date) => {
+  const today = new Date();
+  const d = new Date(date);
+  return (
+    d.getFullYear() === today.getFullYear() &&
+    d.getMonth() === today.getMonth() &&
+    d.getDate() === today.getDate()
+  );
+};
+  // 🎵 Toggle Radio
+  const toggleRadio = () => {
+    if (isRadioOpen) {
+      audioRef.current.pause();
+      setIsRadioAnimating(false);
+    } else {
+      audioRef.current.play();
+      setIsRadioAnimating(true);
+    }
+    setIsRadioOpen(!isRadioOpen);
+  };
+
+  // 📖 Toggle Diary
+  const toggleDiary = () => {
+    const pageFlipAudio = new Audio(pageFlip);
+    pageFlipAudio.play();
+
+    if (!isDiaryOpen) {
+      setIsDiaryOpen(true);
+      setTimeout(() => setShowEntriesView(true), 1000);
+    } else {
+      setIsDiaryOpen(false);
+      setTimeout(() => setShowEntriesView(false), 1000);
+    }
+  };
+
+  // Fetch entries
   useEffect(() => {
     const fetchEntries = async () => {
       try {
@@ -28,89 +84,221 @@ const DashboardPage = () => {
         content,
         date: new Date(),
       });
-      setEntries([response.data, ...entries]); // Add new entry to the top
-      setContent(""); // Clear textarea
+
+      setEntries([response.data, ...entries]);
+      setContent("");
+
+      setIsAnimating(true);
+      setTimeout(() => setIsAnimating(false), 500);
     } catch (error) {
       console.error("Could not create entry", error);
     }
   };
 
-  const handleDelete = async (e)=> {
-    e.preventDefault();
-    
-  }
+  const handleDeleteEntry = async (id) => {
+    try {
+      await api.delete(`/entries/${id}`);
+      setEntries(entries.filter((entry) => entry._id !== id));
+    } catch (error) {
+      console.error("Could not delete entry", error);
+    }
+  };
+
+  // 📅 Find entry for selected date
+  const selectedEntry = entries.find((entry) => {
+    const entryDate = new Date(entry.date);
+    return (
+      entryDate.getFullYear() === selectedDate.getFullYear() &&
+      entryDate.getMonth() === selectedDate.getMonth() &&
+      entryDate.getDate() === selectedDate.getDate()
+    );
+  });
 
   return (
-    // py-2 px-4 bg-amber-950 shadow-md text-white font-bold rounded-md hover:bg-opacity-90 transition-all duration-300
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-      <header className="flex justify-between items-center mb-8">
-        <h1 className="text-5xl font-display text-coffee">Your Diary ✨</h1>
-        <div className="flex flex-wrap">
-          <ShadowButton onClick={logout}>
-            logout :(
-          </ShadowButton>
-        </div>
+    <div className="max-w-4xl mx-auto sm:p-6 relative ">
+      <header className="flex justify-between  items-center  h-24">
+        <img src={diarytext} alt="Diary Text" className="w-56 ml-10 top-0 right-0  z-50 " />
+        {/* <h1 className="text-5xl font-display text-coffee ml-9">
+          Your Diary ✨
+        </h1> */}
+        
+          
+        <ShadowButton className="" onClick={logout}>logout :(</ShadowButton>
+        
       </header>
 
-      {/* New Entry Form */}
-      <div className="bg-peach p-6 rounded-xl shadow-md mb-8">
-        <h2 className="text-2xl font-bold text-coffee mb-4">
-          What's on your mind today?
-        </h2>
-        <form onSubmit={handleCreateEntry}>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="w-full h-32 p-3 text-coffee bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-sunset"
-            placeholder="Start writing..."
-          ></textarea>
-          <ShadowButton type="submit" className="mt-4">save my day ;)</ShadowButton>
-          
-        </form>
-      </div>
+      <div className="flex flex-col lg:flex-row gap-4">
 
-      {/* Display Entries */}
-      <div className="space-y-6">
-        {entries.map((entry) => (
-          <div
-            key={entry._id}
-            className="bg-white p-6 rounded-xl shadow-md border-l-4 border-sunset"
-          >
-            
-              <div
-                className="relative h-96 overflow-y-auto 
-                    bg-local bg-[repeating-linear-gradient(white,white_24px,#d1d5db_25px),url('/paper-texture.png')]
+        {/* LEFT ICONS */}
+        <div className="hidden lg:flex flex-col items-center gap-2 -ml-52 mt-4">
+          <div className="lg:w-60 lg:h-44 w-40 h-32 flex items-center justify-center">
+            <img
+              src={isDiaryOpen ? diaryOpen : diaryIcon}
+              alt="Diary Icon"
+              onClick={toggleDiary}
+              className="max-w-full max-h-full object-contain cursor-pointer transition-all duration-500 hover:scale-110 hover:rotate-3"
+            />
+          </div>
 
-                    text-gray-800 font-handwriting p-4 pt-[22px] leading-[25px] w-full rounded-md"
-              >
-                {/* Optional red margin line */}
-                <div className="absolute top-0 left-10 w-[2px] h-full bg-red-400"></div>
-                <div className="flex justify-between">
-                {/* Date */}
-                <p className="text-sm text-coffee font-semibold mb-4 ml-12">
-                  {new Date(entry.date).toLocaleDateString("en-US", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
-                  <button onClick={handleDelete} className="group relative ml-4">
-                    <span className="absolute top-1 left-1 rounded bg-black transition-transform duration-200 group-hover:translate-x-[2px] group-hover:translate-y-[2px] w-full h-full"></span>
-                    <span className="relative inline-block rounded border-2 border-black bg-white px-4 py-2 text-base font-bold text-black transition-all duration-200 group-hover:bg-amber-950 group-hover:text-yellow-100">
-                        delete X
-                    </span>
-                </button> 
+          <img
+            src={habit}
+            alt="Habit Tracker"
+            // onClick={toggleRadio}
+            className={`lg:w-36 lg:h-36 cursor-pointer transition-all duration-500 hover:scale-110  hover:-rotate-3
+              `}
+          />
+          <img
+            src={isRadioOpen ? radioOpen : radioClose}
+            alt="Radio"
+            onClick={toggleRadio}
+            className={`lg:w-48 lg:h-48 cursor-pointer transition-all duration-500 hover:scale-110 ${
+              isRadioAnimating
+                ? "animate-float drop-shadow-[0_0_25px_rgba(255,180,80,0.8)]"
+                : ""
+            }`}
+          />
+
+          <audio ref={audioRef} loop>
+            <source src={music} type="audio/mpeg" />
+          </audio>
+        </div>
+
+        {/* 📦 SHADOW BOX */}
+        <ShadowBox className=" mt-8 lg:w-[900px] w-[420px] mb-8">
+
+          {!showEntriesView ? (
+            <>
+              <h2 className="text-2xl font-bold text-coffee mb-4">
+                What's on your mind today{" "}
+                <span className="text-sunset">{name}</span>?
+              </h2>
+
+              <form onSubmit={handleCreateEntry}>
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="w-full h-80 px-4 text-coffee bg-[repeating-linear-gradient(white,white_20px,#d1d5db_25px)] rounded-md focus:outline-none focus:ring-2 focus:ring-sunset"
+                  placeholder="Start writing..."
+                ></textarea>
+
+                <div className="flex justify-between mt-4">
+                  <ShadowButton type="submit">
+                    save my day ;)
+                  </ShadowButton>
                 </div>
-                {/* Content */}
-                <p className="text-gray-700 whitespace-pre-wrap ml-12">
-                  {entry.content}
-                </p>
+              </form>
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl font-bold text-coffee mb-6">
+                {name}'s memories 📅✨
+              </h2>
+
+              <div className="flex flex-col lg:flex-row gap-8 ">
+
+                {/* 📅 Calendar */}
+                <Calendar
+                  onChange={setSelectedDate}
+                  value={selectedDate}
+                  className="custom-calendar"
+                  
+                  tileClassName={({ date }) => {
+                    const hasEntry = entries.some((entry) => {
+                      const entryDate = new Date(entry.date);
+                      return (
+                        entryDate.getFullYear() === date.getFullYear() &&
+                        entryDate.getMonth() === date.getMonth() &&
+                        entryDate.getDate() === date.getDate()
+                      );
+                    });
+                    return hasEntry
+                      ? "bg-pink-200 rounded-full"
+                      : null;
+                  }}
+                />
+
+                {/* 📖 Entry Display */}
+                <div className="flex-1 bg-white rounded-lg p-6 shadow border-l-4 border-sunset">
+                  <h3 className="font-bold mb-3">
+                    {selectedDate.toDateString()}
+                  </h3>
+
+                  {selectedEntry ? (
+  <>
+    {editingId === selectedEntry._id ? (
+      <>
+        <textarea
+          value={editingContent}
+          onChange={(e) => setEditingContent(e.target.value)}
+          className="w-full h-40 p-3 border rounded-md mb-3"
+        />
+
+        <div className="flex gap-3">
+          <ShadowButton
+            onClick={async () => {
+              const res = await api.put(
+                `/entries/${selectedEntry._id}`,
+                { content: editingContent }
+              );
+
+              setEntries(
+                entries.map((e) =>
+                  e._id === selectedEntry._id ? res.data : e
+                )
+              );
+
+              setEditingId(null);
+            }}
+          >
+            Save
+          </ShadowButton>
+
+          <ShadowButton onClick={() => setEditingId(null)}>
+            Cancel
+          </ShadowButton>
+        </div>
+      </>
+    ) : (
+      <>
+        <div className="max-h-64 overflow-y-auto pr-2 ">
+  <p className="whitespace-pre-wrap text-gray-700">
+    {selectedEntry.content}
+  </p>
+</div>
+
+        <div className="flex gap-3 mt-4">
+          {isToday(selectedEntry.date) && (
+            <ShadowButton
+              onClick={() => {
+                setEditingId(selectedEntry._id);
+                setEditingContent(selectedEntry.content);
+              }}
+            >
+              Edit
+            </ShadowButton>
+          )}
+
+          <ShadowButton
+            onClick={() =>
+              handleDeleteEntry(selectedEntry._id)
+            }
+          >
+            Delete
+          </ShadowButton>
+        </div>
+      </>
+    )}
+  </>
+) : (
+  <p className="text-coffee">
+    No entry for this day 📭
+  </p>
+)}
+                </div>
               </div>
-              
-            </div>
-          
-        ))}
+            </>
+          )}
+        </ShadowBox>
       </div>
     </div>
   );

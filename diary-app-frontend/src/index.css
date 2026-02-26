@@ -7,12 +7,92 @@
   font-family: "Dancing Script", cursive;
 }
 .text-cream{
-  color: #FFF7D4
+  color: #e2d38d
+  /* color: #FFF7D4 */
 }
 .text-coffee{
   color: #6C3428
 }
 
 .bg-cream{
-  background-color: #FFF7D4;
+  background-color: #fff2be;
+}
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 2s ease-in-out infinite;
+}
+/* Calendar main container */
+.custom-calendar {
+  background: #fffaf3;
+  border-radius: 50px;
+  border: 2px solid #000;
+  padding: 20px;
+  font-family: 'Georgia', serif;
+
+  box-shadow:
+    8px 8px 0px #000,
+    0 15px 30px rgba(0,0,0,0.1);
+
+  transition: transform 0.2s ease;
+}
+
+
+/* Navigation (Month + arrows) */
+.custom-calendar .react-calendar__navigation button {
+  color: #6b4f3b; /* coffee color */
+  font-weight: bold;
+  font-size: 16px;
+  font-weight: bolder;
+}
+
+/* Day numbers */
+.custom-calendar .react-calendar__tile {
+  color: #5a3e2b;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+/* Hover effect */
+.custom-calendar .react-calendar__tile:hover {
+  background: #ffe4c4;
+}
+
+/* Selected day */
+.custom-calendar .react-calendar__tile--active {
+  background: #935f5f !important;
+  color: rgb(255, 208, 148) !important;
+}
+
+/* Today highlight */
+.custom-calendar .react-calendar__tile--now {
+  background: #ffd6a5;
+}
+/* Soft diary-style scrollbar */
+
+/* Target only your diary scroll container */
+.diary-scroll {
+  scrollbar-width: none; /* Firefox */
+}
+
+.diary-scroll::-webkit-scrollbar {
+  display: none; /* Chrome */
+}
+
+
+.diary-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.diary-scroll::-webkit-scrollbar-thumb {
+  background-image: url('/pen-scroll.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  min-height: 300px
+  ;
 }
