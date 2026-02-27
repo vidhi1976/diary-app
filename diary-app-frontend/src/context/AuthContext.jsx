@@ -32,8 +32,13 @@ const AuthProvider = ({children})=>{
         Navigate('/login');
     };
 
+    const register = (newToken,newName) =>{
+        setToken(newToken);
+        setName(newName);
+    };
+
     return (
-        <AuthContext.Provider value={{ token, name, isAuthenticated, login, logout }}>
+        <AuthContext.Provider value={{ token, name, isAuthenticated, login, logout, register }}>
             {children}
         </AuthContext.Provider>
     )
