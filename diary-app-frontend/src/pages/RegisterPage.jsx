@@ -20,7 +20,7 @@ const RegisterPage = () => {
             // Call the register endpoint instead of login
             const response = await api.post('/auth/register', { name, username, password });
             // Log the user in immediately after successful registration
-            login(response.data.token);
+            login(response.data.token, response.data.user.name);
             // Navigate to the main dashboard page
             navigate('/');
         } catch (err) {
