@@ -57,10 +57,10 @@ const [editingContent, setEditingContent] = useState("");
 
     if (!isDiaryOpen) {
       setIsDiaryOpen(true);
-      setTimeout(() => setShowEntriesView(true), 1000);
+      setTimeout(() => setShowEntriesView(true),100);
     } else {
       setIsDiaryOpen(false);
-      setTimeout(() => setShowEntriesView(false), 1000);
+      setTimeout(() => setShowEntriesView(false), 100);
     }
   };
 
