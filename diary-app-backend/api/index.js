@@ -25,4 +25,4 @@ const entryRoutes = require('../routes/entries');
 app.use('/api/auth', authRoutes);
 app.use('/api/entries', entryRoutes);
 
-module.exports = app;   // ✅ IMPORTANT
+module.exports = app;   

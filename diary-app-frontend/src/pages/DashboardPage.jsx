@@ -136,7 +136,8 @@ const [editingContent, setEditingContent] = useState("");
               src={isDiaryOpen ? diaryOpen : diaryIcon}
               alt="Diary Icon"
               onClick={toggleDiary}
-              className="max-w-full max-h-full object-contain cursor-pointer transition-all duration-500 hover:scale-110 hover:rotate-3"
+              className={`max-w-full max-h-full object-contain cursor-pointer transition-all duration-500 hover:scale-110 hover:rotate-3
+                 ${isAnimating ? "animate-bounce scale-110 rotate-6" : ""}`}
             />
           </div>
 

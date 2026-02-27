@@ -20,6 +20,8 @@
                 navigate('/');
             } catch (err) {
                 setError('Failed to log in. Please check your credentials.');
+                console.error(err);
+                
             }
         };
         return (
